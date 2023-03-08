@@ -1,0 +1,17 @@
+# remove ".example" to active configs
+# http & ws server port
+ServerPort = ":50000"
+# ws path
+ServerPath = "/nostr"
+# mode debug/release
+ServerMode = "debug"
+# bytes
+MaxMessageSize = 1073741824
+
+# pg server
+[PGSQL]
+DBName = "pg"
+Username = "pg"
+Password = "pgpwd"
+Host = "0.0.0.0"
+Port = 5432
