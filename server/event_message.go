@@ -36,8 +36,14 @@ func setMetaData(s *melody.Session, event *nostr.Event) {
 
 	e := dao.DB.Model(&pu).Where("pubkey = ?", event.PubKey).First(&user)
 	if gorm.IsRecordNotFoundError(e.Error) {
+		pu.Relays = make([]entity.Relay, 0)
 		dao.DB.Model(&pu).Create(&pu)
-		s.Write(SerialMessages("NOTICE", event.ID, "saved."))
+		msg := SerialMessages("OK", event.ID, true, "saved.")
+		logrus.Info("msg: ", msg)
+		e := s.Write(msg)
+		if e != nil {
+			logrus.Error(e.Error())
+		}
 		return
 	} else if e.Error != nil {
 		logrus.Error(e.Error.Error())
@@ -45,5 +51,5 @@ func setMetaData(s *melody.Session, event *nostr.Event) {
 		return
 	}
 	dao.DB.Model(&pu).Where("pubkey = ?", event.PubKey).Update(&pu)
-	s.Write(SerialMessages("NOTICE", event.ID, "saved."))
+	s.Write(SerialMessages("OK", event.ID, true, "saved."))
 }

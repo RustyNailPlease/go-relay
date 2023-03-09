@@ -6,11 +6,13 @@ import (
 	"github.com/RustyNailPlease/go-relay/entity"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/sirupsen/logrus"
 )
 
 var DB *gorm.DB
 
 func InitDB(host string, port string, dbName string, username string, password string) {
+	logrus.Info("数据库初始化。")
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		host, username, password, dbName, port,
 	)
@@ -22,4 +24,5 @@ func InitDB(host string, port string, dbName string, username string, password s
 	DB = db
 	DB.LogMode(true)
 	db.AutoMigrate(&entity.Event{}, &entity.User{})
+	logrus.Info("数据库初始化完成。")
 }

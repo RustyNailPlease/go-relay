@@ -34,9 +34,10 @@ func parseReqFilterMessage(raw []json.RawMessage) (subid string, filters []nostr
 }
 
 func SerialMessages(eles ...interface{}) (b []byte) {
-	if b, err := json.Marshal(eles); err != nil {
+	buf, err := json.Marshal(eles)
+	if err != nil {
 		logrus.Error(err.Error())
 		return b
 	}
-	return b
+	return buf
 }
