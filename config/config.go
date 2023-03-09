@@ -14,4 +14,8 @@ type ServerConfig struct {
 		Host     string
 		Port     string
 	}
+
+	Relay struct {
+		AdminPubKey string
+	}
 }

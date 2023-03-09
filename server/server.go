@@ -42,6 +42,14 @@ func InitServer(config *config.ServerConfig) {
 
 func initHandlers() {
 	httpServer.GET(serverConfig.ServerPath, func(ctx *gin.Context) {
+
+		// return relay meta data
+		acceptHeader := ctx.GetHeader("Accept")
+		if acceptHeader != "" && acceptHeader == "application/nostr+json" {
+			onNip11(ctx)
+			return
+		}
+
 		err := wsServer.HandleRequest(ctx.Writer, ctx.Request)
 		if err != nil {
 			logrus.Panic(err.Error())

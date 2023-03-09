@@ -15,3 +15,6 @@ Username = "pg"
 Password = "pgpwd"
 Host = "0.0.0.0"
 Port = 5432
+
+[Relay]
+AdminPubKey = "xxx"

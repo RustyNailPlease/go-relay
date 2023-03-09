@@ -23,6 +23,6 @@ func InitDB(host string, port string, dbName string, username string, password s
 	}
 	DB = db
 	DB.LogMode(true)
-	db.AutoMigrate(&entity.Event{}, &entity.User{})
+	db.AutoMigrate(&entity.Event{}, &entity.User{}, &entity.RelayMeta{})
 	logrus.Info("数据库初始化完成。")
 }
