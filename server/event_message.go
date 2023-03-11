@@ -18,6 +18,7 @@ const (
 	EVENT_KIND_SET_METADATA     int = 0
 	EVENT_KIND_TEXT_NOTE        int = 1
 	EVENT_KIND_RECOMMEND_SERVER int = 2
+	EVENT_KIND_CONTACTS         int = 3
 	EVENT_KIND_RELAY_LIST       int = 10002
 )
 
@@ -26,19 +27,51 @@ func init() {
 
 	EVENT_HANDLER[EVENT_KIND_SET_METADATA] = setMetaData
 	EVENT_HANDLER[EVENT_KIND_TEXT_NOTE] = publishTextNote
+	EVENT_HANDLER[EVENT_KIND_RELAY_LIST] = setRelays
+	EVENT_HANDLER[EVENT_KIND_CONTACTS] = setContacts
 }
 
-/*
-*
+func setContacts(s *melody.Session, event *nostr.Event) {
+	b, _ := json.Marshal(event)
+	logrus.Info("contract: ", string(b))
+}
 
-	{"id":"67ed155dda2b215d8dc66efa40ae04ec05f9db0c54fef3335553ea014666f18c",
-	"pubkey":"d7cbfa9c169fe0412e30ad50c7ef5bb578d57ba30abfa22a24eb3455b98c60cb",
-	"created_at":1678525968,
-	"kind":1,
-	"tags":[],
-	"content":"我也是",
-	"sig":"80b8be15bdf2d6c9b0a1aa18b3e4cc1855c75b69eeb72dbc1d71202c0097c53580ce451a6c4898f2c0b45e5bb4bc26cf7918e8d4a81fe21a021d1ef47884eb9b"}
-*/
+func setRelays(s *melody.Session, event *nostr.Event) {
+	logrus.Info("event: ", event)
+	var user entity.User
+
+	rs := make([]entity.Relay, 0)
+	for _, t := range event.Tags {
+		tmp := entity.Relay{
+			Url: t[1],
+		}
+		if len(t) > 2 {
+			tmp.Read = t[2]
+		} else {
+			tmp.Read = "write"
+		}
+		rs = append(rs, tmp)
+	}
+
+	buf, _ := json.Marshal(rs)
+
+	o := dao.DB.Model(&entity.User{}).Where("pubkey = ?", event.PubKey).Find(&user)
+	if o.Error != nil && !gorm.IsRecordNotFoundError(o.Error) {
+		s.Write(SerialMessages("NOTICE", event.ID, "save relays error"))
+		return
+	} else if o.Error != nil && gorm.IsRecordNotFoundError(o.Error) {
+		user = entity.User{}
+		user.Pubkey = event.PubKey
+		user.Relays = buf
+
+		dao.DB.Model(&entity.User{}).Create(&user)
+	}
+
+	user.Relays = buf
+	dao.DB.Model(&entity.User{}).Where("pubkey = ?", event.PubKey).Update(&user)
+	s.Write(SerialMessages("OK", event.ID, true, "relays saved."))
+}
+
 func publishTextNote(s *melody.Session, event *nostr.Event) {
 	buf, _ := json.Marshal(event)
 	logrus.Info(string(buf))
@@ -77,7 +110,8 @@ func setMetaData(s *melody.Session, event *nostr.Event) {
 
 	e := dao.DB.Model(&pu).Where("pubkey = ?", event.PubKey).First(&user)
 	if gorm.IsRecordNotFoundError(e.Error) {
-		pu.Relays = make([]entity.Relay, 0)
+		pu.Relays = make([]byte, 0)
+
 		dao.DB.Model(&pu).Create(&pu)
 		msg := SerialMessages("OK", event.ID, true, "saved.")
 		// logrus.Info("msg: ", msg)

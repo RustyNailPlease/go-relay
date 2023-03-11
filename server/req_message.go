@@ -7,7 +7,6 @@ import (
 	"github.com/RustyNailPlease/go-relay/entity"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/olahol/melody"
-	"github.com/sirupsen/logrus"
 )
 
 func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
@@ -15,9 +14,6 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 	if len(filters) == 0 {
 		s.Write(SerialMessages("EOSE", subid))
 	}
-	// query := dao.DB.Model(&entity.Event{})
-
-	// conditions = make([]interface{}, 0)
 
 	for _, filter := range filters {
 		query := dao.DB.Model(&entity.Event{})
@@ -67,7 +63,7 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 		sort.Sort(entity.Events(es))
 
 		for _, e := range es {
-			logrus.Info("下发： ", e.ID, "[", e.Content, "] --> ", subid)
+			// logrus.Info("下发： ", e.ID, "[", e.Content, "] --> ", subid)
 			s.Write(SerialMessages("EVENT", subid, e))
 		}
 	}

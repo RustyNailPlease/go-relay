@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"encoding/json"
+
 	"github.com/jinzhu/gorm"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/sirupsen/logrus"
@@ -17,7 +19,7 @@ type User struct {
 	Name    string
 	About   string
 	Picture string
-	Relays  []Relay `gorm:"type:jsonb"`
+	Relays  json.RawMessage `gorm:"type:jsonb"`
 }
 
 func GetUserFromProtocol(event *nostr.Event) (user User, e error) {
