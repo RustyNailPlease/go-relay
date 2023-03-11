@@ -52,7 +52,7 @@ func initHandlers() {
 
 		err := wsServer.HandleRequest(ctx.Writer, ctx.Request)
 		if err != nil {
-			logrus.Panic(err.Error())
+			logrus.Error("ws error: ", err.Error())
 		}
 	})
 	// ws handlers' entry
