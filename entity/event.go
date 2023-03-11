@@ -8,13 +8,13 @@ import (
 )
 
 type Event struct {
-	ID        string
-	PubKey    string `json:"pubkey"`
-	CreatedAt int64  `json:"created_at"` // secs
-	Kind      int
-	Tags      json.RawMessage `gorm:"type:jsonb"`
-	Content   string
-	Sig       string
+	ID        string          `json:"id"`
+	PubKey    string          `json:"pubkey"`
+	CreatedAt int64           `json:"created_at"` // secs
+	Kind      int             `json:"kind"`
+	Tags      json.RawMessage `gorm:"type:jsonb" json:"tags"`
+	Content   string          `json:"content"`
+	Sig       string          `json:"sig"`
 }
 
 func FromNostrEvent(e *nostr.Event) (Event, error) {
@@ -32,3 +32,9 @@ func FromNostrEvent(e *nostr.Event) (Event, error) {
 		Sig:       e.Sig,
 	}, nil
 }
+
+type Events []Event
+
+func (a Events) Len() int           { return len(a) }
+func (a Events) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a Events) Less(i, j int) bool { return a[i].CreatedAt >= a[j].CreatedAt }

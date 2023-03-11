@@ -55,9 +55,19 @@ func initWSHandlers() {
 
 			s.Write(SerialMessages("OK", event.PubKey, ""))
 		case "REQ":
-			pubkey, _ := parseReqFilterMessage(midJson)
-			logrus.Info("filter req: ", pubkey)
-			s.Write(SerialMessages("OK", pubkey, ""))
+			logrus.Info("==============")
+			for _, s := range midJson {
+				logrus.Info(string(s))
+			}
+			logrus.Info("==============")
+			subId, filters := parseReqFilterMessage(midJson)
+			if filters != nil {
+				logrus.Info()
+			}
+
+			handleReqRequest(s, subId, filters)
+			// logrus.Info("filter req: ", subId,  " filters: "m f)
+			// s.Write(SerialMessages("OK", subId, ""))
 		default:
 			break
 		}

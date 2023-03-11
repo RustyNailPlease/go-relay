@@ -48,7 +48,7 @@ func publishTextNote(s *melody.Session, event *nostr.Event) {
 		// save it
 		et, err := entity.FromNostrEvent(event)
 		if err != nil {
-			logrus.Error("parse event error : ", err.Error())
+			logrus.Error("parse event error :", err.Error())
 			s.Write(SerialMessages("NOTICE", event.ID, "save note error"))
 		} else {
 			dao.DB.Model(&entity.Event{}).Create(&et)
