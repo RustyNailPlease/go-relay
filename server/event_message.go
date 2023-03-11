@@ -34,6 +34,27 @@ func init() {
 func setContacts(s *melody.Session, event *nostr.Event) {
 	b, _ := json.Marshal(event)
 	logrus.Info("contract: ", string(b))
+
+	var count int
+	dao.DB.Model(&entity.Event{}).Where("pub_key = ? and kind = ?", event.PubKey, event.Kind).Count(&count)
+	if count == 0 {
+		e, err := entity.FromNostrEvent(event)
+		if err != nil {
+			logrus.Error(err.Error())
+			s.Write(SerialMessages("NOTICE", event.ID, "save contract error"))
+			return
+		}
+		dao.DB.Model(&entity.Event{}).Create(&e)
+	} else {
+		e, err := entity.FromNostrEvent(event)
+		if err != nil {
+			logrus.Error(err.Error())
+			s.Write(SerialMessages("NOTICE", event.ID, "save contract error"))
+			return
+		}
+		dao.DB.Model(&entity.Event{}).Where("pub_key = ? and kind = ?", event.PubKey, event.Kind).Update(&e)
+	}
+	s.Write(SerialMessages("OK", event.ID, true, "contract saved."))
 }
 
 func setRelays(s *melody.Session, event *nostr.Event) {

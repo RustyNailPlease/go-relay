@@ -37,4 +37,4 @@ type Events []Event
 
 func (a Events) Len() int           { return len(a) }
 func (a Events) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a Events) Less(i, j int) bool { return a[i].CreatedAt >= a[j].CreatedAt }
+func (a Events) Less(i, j int) bool { return a[i].CreatedAt > a[j].CreatedAt }
