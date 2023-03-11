@@ -19,6 +19,7 @@ const (
 	EVENT_KIND_TEXT_NOTE        int = 1
 	EVENT_KIND_RECOMMEND_SERVER int = 2
 	EVENT_KIND_CONTACTS         int = 3
+	EVENT_KIND_DELETION         int = 5
 	EVENT_KIND_REACTION         int = 7
 	EVENT_KIND_RELAY_LIST       int = 10002
 )
@@ -30,7 +31,12 @@ func init() {
 	EVENT_HANDLER[EVENT_KIND_TEXT_NOTE] = publishTextNote
 	EVENT_HANDLER[EVENT_KIND_RELAY_LIST] = setRelays
 	EVENT_HANDLER[EVENT_KIND_CONTACTS] = setContacts
+	EVENT_HANDLER[EVENT_KIND_DELETION] = deleteEvent
 	EVENT_HANDLER[EVENT_KIND_REACTION] = saveReaction
+}
+
+func deleteEvent(s *melody.Session, event *nostr.Event) {
+	// todo
 }
 
 func saveReaction(s *melody.Session, event *nostr.Event) {
