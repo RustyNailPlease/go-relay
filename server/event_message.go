@@ -19,6 +19,7 @@ const (
 	EVENT_KIND_TEXT_NOTE        int = 1
 	EVENT_KIND_RECOMMEND_SERVER int = 2
 	EVENT_KIND_CONTACTS         int = 3
+	EVENT_KIND_REACTION         int = 7
 	EVENT_KIND_RELAY_LIST       int = 10002
 )
 
@@ -29,11 +30,38 @@ func init() {
 	EVENT_HANDLER[EVENT_KIND_TEXT_NOTE] = publishTextNote
 	EVENT_HANDLER[EVENT_KIND_RELAY_LIST] = setRelays
 	EVENT_HANDLER[EVENT_KIND_CONTACTS] = setContacts
+	EVENT_HANDLER[EVENT_KIND_REACTION] = saveReaction
+}
+
+func saveReaction(s *melody.Session, event *nostr.Event) {
+	// b, _ := json.Marshal(event)
+	// logrus.Info("contract: ", string(b))
+	var count int
+	dao.DB.Model(&entity.Event{}).Where("id = ? and kind = ?", event.ID, event.Kind).Count(&count)
+	if count == 0 {
+		e, err := entity.FromNostrEvent(event)
+		if err != nil {
+			logrus.Error(err.Error())
+			s.Write(SerialMessages("NOTICE", event.ID, "save reaction error"))
+			return
+		}
+		dao.DB.Model(&entity.Event{}).Create(&e)
+		s.Write(SerialMessages("OK", event.ID, true, "reaction saved."))
+	} else {
+		e, err := entity.FromNostrEvent(event)
+		if err != nil {
+			logrus.Error(err.Error())
+			s.Write(SerialMessages("NOTICE", event.ID, "save reaction error"))
+			return
+		}
+		dao.DB.Model(&entity.Event{}).Where("id = ? and kind = ?", event.ID, event.Kind).Update(&e)
+		s.Write(SerialMessages("OK", event.ID, true, "reaction saved."))
+	}
 }
 
 func setContacts(s *melody.Session, event *nostr.Event) {
-	b, _ := json.Marshal(event)
-	logrus.Info("contract: ", string(b))
+	// b, _ := json.Marshal(event)
+	// logrus.Info("contract: ", string(b))
 
 	var count int
 	dao.DB.Model(&entity.Event{}).Where("pub_key = ? and kind = ?", event.PubKey, event.Kind).Count(&count)
