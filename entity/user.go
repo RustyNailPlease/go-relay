@@ -15,11 +15,12 @@ type Relay struct {
 
 type User struct {
 	gorm.Model
-	Pubkey  string `gorm:"primaryKey"`
-	Name    string
-	About   string
-	Picture string
-	Relays  json.RawMessage `gorm:"type:jsonb"`
+	Pubkey     string `gorm:"primaryKey"`
+	Name       string
+	About      string
+	Picture    string
+	SignedNip5 bool
+	Relays     json.RawMessage `gorm:"type:jsonb"`
 }
 
 func GetUserFromProtocol(event *nostr.Event) (user User, e error) {

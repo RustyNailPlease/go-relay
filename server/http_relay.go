@@ -39,3 +39,39 @@ func onNip11(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, nil)
 	}
 }
+
+func onNip05(ctx *gin.Context) {
+	ctx.Request.ParseForm()
+	name, ok := ctx.Params.Get("name")
+	if !ok {
+		ctx.JSON(http.StatusOK, make(map[string]interface{}))
+		return
+	}
+
+	var users []entity.User
+	err := dao.DB.Model(&entity.User{}).Where("name = ? and signed_nip5 = ?", name, true).Find(&users)
+	if err.Error != nil && gorm.IsRecordNotFoundError(err.Error) {
+		ctx.JSON(http.StatusOK, make(map[string]interface{}))
+		return
+	}
+
+	var r entity.Nip5Response
+
+	for _, u := range users {
+		r.Names[u.Name] = u.Pubkey
+
+		if u.Relays != nil && len(u.Relays) > 0 {
+			var relays []entity.Relay
+			if err := json.Unmarshal(u.Relays, &relays); err == nil && len(relays) > 0 {
+				var ru []string
+				for _, relay := range relays {
+					ru = append(ru, relay.Url)
+				}
+				r.Relays[u.Pubkey] = ru
+			}
+
+		}
+	}
+
+	ctx.JSON(http.StatusOK, r)
+}
