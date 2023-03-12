@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/RustyNailPlease/go-relay/config"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/olahol/melody"
 	"github.com/sirupsen/logrus"
@@ -41,6 +42,8 @@ func InitServer(config *config.ServerConfig) {
 }
 
 func initHandlers() {
+
+	httpServer.Use(cors.Default())
 
 	httpServer.GET(".well-known/nostr.json", onNip05)
 
