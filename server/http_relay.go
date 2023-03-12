@@ -15,16 +15,19 @@ func onNip11(ctx *gin.Context) {
 	errO := dao.DB.Model(&entity.RelayMeta{}).Where("pubkey = ?", serverConfig.Relay.AdminPubKey).First(&rm)
 	if gorm.IsRecordNotFoundError(errO.Error) {
 
-		nipsBuf, _ := json.Marshal([]int{1, 2, 3, 4, 11, 20, 65})
+		nipsBuf, _ := json.Marshal([]int{1})
+		if serverConfig.Relay.Nips != nil || len(serverConfig.Relay.Nips) > 0 {
+			nipsBuf, _ = json.Marshal(serverConfig.Relay.Nips)
+		}
 
 		rm = entity.RelayMeta{
 			Pubkey:        serverConfig.Relay.AdminPubKey,
-			Name:          "RustyWorld",
-			Description:   "Welcome Home",
-			Contact:       serverConfig.Relay.AdminPubKey,
+			Name:          serverConfig.Relay.Name,
+			Description:   serverConfig.Relay.Description,
+			Contact:       serverConfig.Relay.Contract,
 			SupportedNips: nipsBuf,
-			Software:      "http://192.168.2.4:50000",
-			Version:       "0.1",
+			Software:      serverConfig.Relay.Software,
+			Version:       serverConfig.Relay.Version,
 		}
 		dao.DB.Model(&entity.RelayMeta{}).Create(&rm)
 		ctx.JSON(http.StatusOK, rm)

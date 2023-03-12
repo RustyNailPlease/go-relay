@@ -17,5 +17,12 @@ type ServerConfig struct {
 
 	Relay struct {
 		AdminPubKey string
+		Nips        []int
+
+		Name        string
+		Description string
+		Version     string
+		Contract    string
+		Software    string
 	}
 }
