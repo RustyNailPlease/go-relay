@@ -61,17 +61,35 @@ func onNip05(ctx *gin.Context) {
 	for _, u := range users {
 		r.Names[u.Name] = u.Pubkey
 
-		if u.Relays != nil && len(u.Relays) > 0 {
-			var relays []entity.Relay
-			if err := json.Unmarshal(u.Relays, &relays); err == nil && len(relays) > 0 {
-				var ru []string
-				for _, relay := range relays {
-					ru = append(ru, relay.Url)
-				}
-				r.Relays[u.Pubkey] = ru
-			}
-
+		// get contract
+		var contractE entity.Event
+		cE := dao.DB.Model(&entity.Event{}).Where("pub_key = ? and kind = ?", u.Pubkey, 3).Find(&contractE)
+		if cE.Error != nil || gorm.IsRecordNotFoundError(cE.Error) {
+			continue
 		}
+
+		// var cR map[string]interface{}
+		cR := make(map[string]interface{})
+		err := json.Unmarshal([]byte(contractE.Content), &cR)
+		if err != nil {
+			continue
+		}
+		var ru []string
+		for k, _ := range cR {
+			ru = append(ru, k)
+		}
+		r.Relays[u.Pubkey] = ru
+		// if u.Relays != nil && len(u.Relays) > 0 {
+		// 	var relays []entity.Relay
+		// 	if err := json.Unmarshal(u.Relays, &relays); err == nil && len(relays) > 0 {
+
+		// 		for _, relay := range relays {
+		// 			ru = append(ru, relay.Url)
+		// 		}
+
+		// 	}
+
+		// }
 	}
 
 	ctx.JSON(http.StatusOK, r)
