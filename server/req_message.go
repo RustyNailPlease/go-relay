@@ -68,10 +68,14 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 			query = query.Where(sql, args...)
 		}
 
-		if filter.Limit > 0 && filter.Limit < 200 {
+		if filter.Limit > 0 && filter.Limit <= serverConfig.MaxRows {
 			query = query.Limit(filter.Limit)
 		} else {
-			query = query.Limit(20)
+			if serverConfig.MaxRows == -1 {
+				//query = query.Limit()
+			} else {
+				query = query.Limit(serverConfig.MaxRows)
+			}
 		}
 
 		var es []entity.Event

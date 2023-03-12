@@ -7,6 +7,9 @@ ServerPath = "/nostr"
 ServerMode = "debug"
 # bytes
 MaxMessageSize = 1073741824
+# max row return each fetch req, -1 all
+MaxRows = 100
+
 
 # pg server
 [PGSQL]

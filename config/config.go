@@ -6,6 +6,7 @@ type ServerConfig struct {
 	ServerPath     string
 	ServerMode     string
 	MaxMessageSize int64
+	MaxRows        int
 
 	PGSQL struct {
 		DBName   string
