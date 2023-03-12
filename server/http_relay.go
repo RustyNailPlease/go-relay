@@ -42,11 +42,11 @@ func onNip11(ctx *gin.Context) {
 
 func onNip05(ctx *gin.Context) {
 	ctx.Request.ParseForm()
-	name, ok := ctx.Params.Get("name")
-	if !ok {
-		ctx.JSON(http.StatusOK, make(map[string]interface{}))
-		return
-	}
+	name := ctx.Query("name")
+	// if !ok {
+	// 	ctx.JSON(http.StatusOK, make(map[string]interface{}))
+	// 	return
+	// }
 
 	var users []entity.User
 	err := dao.DB.Model(&entity.User{}).Where("name = ? and signed_nip5 = ?", name, true).Find(&users)
