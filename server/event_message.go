@@ -177,7 +177,7 @@ func setMetaData(s *melody.Session, event *nostr.Event) {
 
 	e := dao.DB.Model(&pu).Where("pubkey = ?", event.PubKey).First(&user)
 	if gorm.IsRecordNotFoundError(e.Error) {
-		// pu.Relays = make([]byte, 0)
+		pu.Relays = make([]byte, 0)
 
 		dao.DB.Model(&pu).Create(&pu)
 		msg := SerialMessages("OK", event.ID, true, "saved.")
