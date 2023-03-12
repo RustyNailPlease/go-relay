@@ -7,6 +7,7 @@ import (
 	"github.com/RustyNailPlease/go-relay/entity"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/olahol/melody"
+	"github.com/sirupsen/logrus"
 )
 
 func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
@@ -37,6 +38,12 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 
 		if filter.Until != nil {
 			conditions["created_at < ?"] = filter.Until.Unix()
+		}
+
+		if len(filter.Tags) > 0 {
+			for _, tag := range filter.Tags {
+				logrus.Info("tag: query: ", tag)
+			}
 		}
 
 		if len(conditions) > 0 {
