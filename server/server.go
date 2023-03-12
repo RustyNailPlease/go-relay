@@ -43,7 +43,14 @@ func InitServer(config *config.ServerConfig) {
 func initHandlers() {
 
 	httpServer.GET(".well-known/nostr.json", onNip05)
-	httpServer.GET("/", onNip11)
+
+	httpServer.GET("/", func(ctx *gin.Context) {
+		acceptHeader := ctx.GetHeader("Accept")
+		if acceptHeader != "" && acceptHeader == "application/nostr+json" {
+			onNip11(ctx)
+			return
+		}
+	})
 
 	httpServer.GET(serverConfig.ServerPath, func(ctx *gin.Context) {
 
