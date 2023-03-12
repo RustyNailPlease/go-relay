@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 
 	"github.com/RustyNailPlease/go-relay/dao"
@@ -44,6 +45,15 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 		if len(filter.Tags) > 0 {
 			tb, _ := json.Marshal(filter.Tags)
 			logrus.Info("tag query: ", string(tb))
+
+			if eid, ok := filter.Tags["e"]; ok {
+				conditions["tags @> ?"] = fmt.Sprintf(`'[["e", "$s"]]'`, eid[0])
+			}
+
+			if pid, ok := filter.Tags["p"]; ok {
+				conditions["tags @> ?"] = fmt.Sprintf(`'[["p", "$s"]]'`, pid[0])
+			}
+
 		}
 
 		if len(conditions) > 0 {
