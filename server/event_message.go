@@ -176,8 +176,8 @@ func setMetaData(s *melody.Session, event *nostr.Event) {
 	}
 
 	e := dao.DB.Model(&pu).Where("pubkey = ?", event.PubKey).First(&user)
-	if gorm.IsRecordNotFoundError(e.Error) {
-		pu.Relays = make([]byte, 0)
+	if e.Error != nil && gorm.IsRecordNotFoundError(e.Error) {
+		pu.Relays, _ = json.Marshal(make([]entity.Relay, 0))
 
 		dao.DB.Model(&pu).Create(&pu)
 		msg := SerialMessages("OK", event.ID, true, "saved.")
@@ -187,7 +187,7 @@ func setMetaData(s *melody.Session, event *nostr.Event) {
 			logrus.Error(e.Error())
 		}
 		return
-	} else if e.Error != nil {
+	} else if e.Error != nil && !gorm.IsRecordNotFoundError(e.Error) {
 		logrus.Error(e.Error.Error())
 		s.Write(SerialMessages("NOTICE", event.ID, "save meta error"))
 		return
