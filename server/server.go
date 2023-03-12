@@ -43,6 +43,7 @@ func InitServer(config *config.ServerConfig) {
 func initHandlers() {
 
 	httpServer.GET(".well-known/nostr.json", onNip05)
+	httpServer.GET("/", onNip11)
 
 	httpServer.GET(serverConfig.ServerPath, func(ctx *gin.Context) {
 
