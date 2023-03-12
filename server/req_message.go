@@ -47,11 +47,11 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 			logrus.Info("tag query: ", string(tb))
 
 			if eid, ok := filter.Tags["e"]; ok {
-				conditions["tags @> ?"] = fmt.Sprintf(`'[["e", "$s"]]'`, eid[0])
+				conditions["tags @> ?"] = fmt.Sprintf("[[\"e\", \"%s\"]]", eid[0])
 			}
 
 			if pid, ok := filter.Tags["p"]; ok {
-				conditions["tags @> ?"] = fmt.Sprintf(`'[["p", "$s"]]'`, pid[0])
+				conditions["tags @> ?"] = fmt.Sprintf("[[\"p\", \"%s\"]]", pid[0])
 			}
 
 		}
