@@ -56,7 +56,8 @@ func onNip05(ctx *gin.Context) {
 	}
 
 	var r entity.Nip5Response
-
+	r.Names = make(map[string]string)
+	r.Relays = make(map[string][]string)
 	for _, u := range users {
 		r.Names[u.Name] = u.Pubkey
 
