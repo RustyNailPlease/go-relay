@@ -37,6 +37,18 @@ func init() {
 
 func deleteEvent(s *melody.Session, event *nostr.Event) {
 	// todo
+	e, err := entity.FromNostrEvent(event)
+	if err != nil {
+		logrus.Error(err.Error())
+		s.Write(SerialMessages("NOTICE", event.ID, "parse event error"))
+		return
+	}
+	dao.DB.Model(&e).Create(&e)
+
+	for _, tag := range event.Tags {
+		dao.DB.Model(&entity.Event{}).Where("pub_key = ? and id = ?", event.PubKey, tag[1]).UpdateColumn("content", e.Content)
+	}
+	s.Write(SerialMessages("OK", event.ID, true, "event deleted saved."))
 }
 
 func saveReaction(s *melody.Session, event *nostr.Event) {
