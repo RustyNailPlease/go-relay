@@ -73,6 +73,8 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 			query = query.Where(sql, args...)
 		}
 
+		query.Order("created_at desc")
+
 		if filter.Limit > 0 && filter.Limit <= serverConfig.MaxRows {
 			query = query.Limit(filter.Limit)
 		} else {
