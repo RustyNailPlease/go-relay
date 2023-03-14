@@ -3,9 +3,18 @@ package server
 import (
 	"encoding/json"
 
+	cacheutils "github.com/RustyNailPlease/CacheUtil"
+	"github.com/RustyNailPlease/go-relay/dao"
+	"github.com/RustyNailPlease/go-relay/entity"
 	"github.com/olahol/melody"
 	"github.com/sirupsen/logrus"
 )
+
+var spammerKeyLRU *cacheutils.LRUCache[string]
+
+func init() {
+	spammerKeyLRU = cacheutils.NewLRU[string](5000)
+}
 
 func initWSHandlers() {
 	wsServer.HandleConnect(func(s *melody.Session) {
@@ -35,6 +44,13 @@ func initWSHandlers() {
 		switch typ {
 		case "EVENT":
 			event := parseEventMessage(midJson)
+
+			// check spammer
+			if isSpamUser(event.PubKey) {
+				s.Write(SerialMessages("NOTICE", event.ID, "banned"))
+				return
+			}
+
 			logrus.Info("event: ", event.ID, "[", event.Kind, "]", " pub: ", event.PubKey)
 			if check, err := event.CheckSignature(); (!check) || err != nil {
 				if err != nil {
@@ -73,4 +89,18 @@ func initWSHandlers() {
 		}
 
 	})
+}
+
+func isSpamUser(pubKey string) (is bool) {
+	is = false
+	if spammerKeyLRU.Contains(pubKey) {
+		return true
+	}
+	var count int
+	dao.DB.Model(&entity.SpamUser{}).Where("user = ?", pubKey).Count(&count)
+	if count > 0 {
+		spammerKeyLRU.Set(pubKey, "")
+		return true
+	}
+	return is
 }
