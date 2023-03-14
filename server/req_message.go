@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/RustyNailPlease/go-relay/dao"
 	"github.com/RustyNailPlease/go-relay/entity"
@@ -40,6 +41,10 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 
 		if filter.Until != nil {
 			conditions["created_at < ?"] = filter.Until.Unix()
+		}
+
+		if filter.Since == nil && filter.Until == nil {
+			conditions["created_at >= ?"] = time.Now().Add(-12 * time.Hour).Unix()
 		}
 
 		if len(filter.Tags) > 0 {
