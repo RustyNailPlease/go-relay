@@ -68,9 +68,9 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 				sql += k + " and "
 				args = append(args, v)
 			}
-			sql += "1=1) order by created_at desc"
+			sql += "1=1)"
 
-			query = query.Where(sql, args...)
+			query = query.Where(sql, args...).Order("created_at desc")
 		}
 
 		// query.Order("created_at desc")
