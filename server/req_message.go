@@ -68,12 +68,12 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 				sql += k + " and "
 				args = append(args, v)
 			}
-			sql += "1=1) order by created_at desc"
+			sql += "1=1)"
 
 			query = query.Where(sql, args...)
 		}
 
-		// query.Order("created_at desc")
+		query = query.Order("created_at desc")
 
 		if filter.Limit > 0 && filter.Limit <= serverConfig.MaxRows {
 			query = query.Limit(filter.Limit)
@@ -91,9 +91,27 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 		sort.Sort(entity.Events(es))
 
 		for _, e := range es {
-			// logrus.Info("下发： ", e.ID, "[", e.Content, "] --> ", subid)
+			if eventDeleted(e.ID) {
+				continue
+			}
 			s.Write(SerialMessages("EVENT", subid, e))
 		}
 	}
 	s.Write(SerialMessages("EOSE", subid))
+}
+
+func eventDeleted(id string) bool {
+
+	if deletedCache.Contains(id) {
+		return true
+	}
+
+	var count int
+	dao.DB.Model(&entity.Event{}).Where("id = ? and kind = 5", id).Count(&count)
+	if count > 0 {
+		logrus.Info(id, " skip for deleted")
+		deletedCache.Set(id, id)
+		return true
+	}
+	return false
 }

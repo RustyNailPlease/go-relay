@@ -44,10 +44,6 @@ func deleteEvent(s *melody.Session, event *nostr.Event) {
 		return
 	}
 	dao.DB.Model(&e).Create(&e)
-
-	for _, tag := range event.Tags {
-		dao.DB.Model(&entity.Event{}).Where("pub_key = ? and id = ?", event.PubKey, tag[1]).UpdateColumn("content", e.Content)
-	}
 	s.Write(SerialMessages("OK", event.ID, true, "event deleted saved."))
 }
 

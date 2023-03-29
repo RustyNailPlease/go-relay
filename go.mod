@@ -3,6 +3,7 @@ module github.com/RustyNailPlease/go-relay
 go 1.20
 
 require (
+	github.com/RustyNailPlease/CacheUtil v0.0.0-20221105102345-4df3a634dbb5
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/jinzhu/gorm v1.9.16
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/RustyNailPlease/CacheUtil v0.0.0-20221105102345-4df3a634dbb5 // indirect
 	github.com/SaveTheRbtz/generic-sync-map-go v0.0.0-20220414055132-a37292614db8 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect

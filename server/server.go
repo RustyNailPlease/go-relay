@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	cacheutils "github.com/RustyNailPlease/CacheUtil"
 	"github.com/RustyNailPlease/go-relay/config"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,11 @@ var httpServer *gin.Engine
 var wsServer *melody.Melody
 var serverConfig *config.ServerConfig
 
+var deletedCache *cacheutils.LRUCache[string]
+
 func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{})
+	deletedCache = cacheutils.NewLRU[string](10000)
 }
 
 func InitServer(config *config.ServerConfig) {
