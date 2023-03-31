@@ -103,6 +103,7 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 func eventDeleted(id string) bool {
 
 	if deletedCache.Contains(id) {
+		logrus.Info(id, " skip for deleted")
 		return true
 	}
 
