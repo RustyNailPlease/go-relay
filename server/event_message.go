@@ -189,5 +189,13 @@ func setMetaData(s *melody.Session, event *nostr.Event) {
 		return
 	}
 	dao.DB.Model(&pu).Where("pubkey = ?", event.PubKey).Update(&pu)
+
+	evt, err := entity.FromNostrEvent(event)
+	if err != nil {
+		logrus.Error(err.Error())
+	} else {
+		dao.DB.Model(&entity.Event{}).FirstOrCreate(&evt, entity.Event{ID: evt.ID})
+	}
+
 	s.Write(SerialMessages("OK", event.ID, true, "saved."))
 }

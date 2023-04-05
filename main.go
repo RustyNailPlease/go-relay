@@ -37,6 +37,7 @@ func main() {
 		config.PGSQL.DBName,
 		config.PGSQL.Username,
 		config.PGSQL.Password,
+		config.ServerMode == "debug",
 	)
 
 	server.InitServer(&config)
