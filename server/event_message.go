@@ -60,17 +60,19 @@ func saveReaction(s *melody.Session, event *nostr.Event) {
 			return
 		}
 		dao.DB.Model(&entity.Event{}).Create(&e)
-		s.Write(SerialMessages("OK", event.ID, true, "reaction saved."))
-	} else {
-		e, err := entity.FromNostrEvent(event)
-		if err != nil {
-			logrus.Error(err.Error())
-			s.Write(SerialMessages("NOTICE", event.ID, "save reaction error"))
-			return
-		}
-		dao.DB.Model(&entity.Event{}).Where("id = ? and kind = ?", event.ID, event.Kind).Update(&e)
-		s.Write(SerialMessages("OK", event.ID, true, "reaction saved."))
+		// s.Write(SerialMessages("OK", event.ID, true, "reaction saved."))
 	}
+	s.Write(SerialMessages("OK", event.ID, true, "reaction saved."))
+	// else {
+	// 	e, err := entity.FromNostrEvent(event)
+	// 	if err != nil {
+	// 		logrus.Error(err.Error())
+	// 		s.Write(SerialMessages("NOTICE", event.ID, "save reaction error"))
+	// 		return
+	// 	}
+	// 	dao.DB.Model(&entity.Event{}).Where("id = ? and kind = ?", event.ID, event.Kind).Update(&e)
+	// 	s.Write(SerialMessages("OK", event.ID, true, "reaction saved."))
+	// }
 }
 
 func setContacts(s *melody.Session, event *nostr.Event) {
@@ -146,20 +148,24 @@ func publishTextNote(s *melody.Session, event *nostr.Event) {
 		if err != nil {
 			logrus.Error("parse event error :", err.Error())
 			s.Write(SerialMessages("NOTICE", event.ID, "save note error"))
+			return
 		} else {
 			dao.DB.Model(&entity.Event{}).Create(&et)
 			s.Write(SerialMessages("OK", event.ID, true, "note saved."))
-		}
-	} else {
-		et, err := entity.FromNostrEvent(event)
-		if err != nil {
-			logrus.Error(err.Error())
-			s.Write(SerialMessages("NOTICE", event.ID, "save note error"))
-		} else {
-			dao.DB.Model(&entity.Event{}).Where("id = ?", et.ID).Update(&et)
-			s.Write(SerialMessages("OK", event.ID, true, "note saved."))
+			return
 		}
 	}
+	s.Write(SerialMessages("OK", event.ID, true, "note saved."))
+	// else {
+	// 	et, err := entity.FromNostrEvent(event)
+	// 	if err != nil {
+	// 		logrus.Error(err.Error())
+	// 		s.Write(SerialMessages("NOTICE", event.ID, "save note error"))
+	// 	} else {
+	// 		dao.DB.Model(&entity.Event{}).Where("id = ?", et.ID).Update(&et)
+	// 		s.Write(SerialMessages("OK", event.ID, true, "note saved."))
+	// 	}
+	// }
 }
 
 func setMetaData(s *melody.Session, event *nostr.Event) {

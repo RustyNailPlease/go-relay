@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/RustyNailPlease/go-relay/cache"
 	"github.com/RustyNailPlease/go-relay/dao"
 	"github.com/RustyNailPlease/go-relay/entity"
 	"github.com/nbd-wtf/go-nostr"
@@ -101,16 +102,31 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 
 func eventDeleted(id string) bool {
 
-	if deletedCache.Contains(id) {
-		logrus.Info(id, " skip for deleted")
-		return true
+	deletedR := cache.RClient.SIsMember("deleted_event", id)
+	// logrus.Info("deletedR: ", deletedR)
+	if deletedR.Err() == nil {
+		if deletedR.Val() {
+			return true
+		}
+	} else {
+		logrus.Error(deletedR.Err())
 	}
+
+	// if deletedCache.Contains(id) {
+	// 	logrus.Info(id, " skip for deleted")
+	// 	return true
+	// }
 
 	var count int
 	dao.DB.Model(&entity.Event{}).Where("id = ? and kind = 5", id).Count(&count)
 	if count > 0 {
 		logrus.Info(id, " skip for deleted")
-		deletedCache.Set(id, id)
+		// deletedCache.Set(id, id)
+		deletedR := cache.RClient.SAdd("deleted_event", id)
+		if deletedR.Err() != nil {
+			logrus.Error(deletedR.Err())
+		}
+
 		return true
 	}
 	return false

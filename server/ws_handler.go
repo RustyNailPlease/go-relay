@@ -2,14 +2,11 @@ package server
 
 import (
 	"encoding/json"
-	"strings"
-	"time"
 
 	cacheutils "github.com/RustyNailPlease/CacheUtil"
 	"github.com/RustyNailPlease/go-relay/cache"
 	"github.com/RustyNailPlease/go-relay/dao"
 	"github.com/RustyNailPlease/go-relay/entity"
-	"github.com/go-redis/redis/v7"
 	"github.com/olahol/melody"
 	"github.com/sirupsen/logrus"
 )
@@ -29,10 +26,11 @@ func initWSHandlers() {
 		logrus.Info("==================connected=======================")
 		logrus.Info(s.Request.Header.Get("Cf-Connecting-Ip") + " connected.")
 		// logrus.Info(s.Request.RemoteAddr)
-		for k, v := range s.Request.Header {
-			logrus.Info(k, " --> ", strings.Join(v, ""))
-		}
-		cache.RClient.ZAdd(ONLINE_USERS, &redis.Z{Score: float64(time.Now().UnixMilli()), Member: s.Request.Header.Get("Cf-Connecting-Ip")})
+		// for k, v := range s.Request.Header {
+		// 	logrus.Info(k, " --> ", strings.Join(v, ""))
+		// }
+		cache.RClient.SAdd(ONLINE_USERS, s.Request.Header.Get("Cf-Connecting-Ip"))
+		// cache.RClient.ZAdd(ONLINE_USERS, &redis.Z{Score: float64(time.Now().UnixMilli()), Member: s.Request.Header.Get("Cf-Connecting-Ip")})
 		// now users
 		cache.PrintOnline()
 		logrus.Info("==================connected=======================")
@@ -41,16 +39,11 @@ func initWSHandlers() {
 	wsServer.HandleDisconnect(func(s *melody.Session) {
 		logrus.Info("================== disconnected =======================")
 		logrus.Info(s.Request.Header.Get("Cf-Connecting-Ip") + " disconnected.")
-		for k, v := range s.Request.Header {
-			logrus.Info(k, " --> ", strings.Join(v, ""))
-		}
+		cache.RClient.SRem(ONLINE_USERS, s.Request.Header.Get("Cf-Connecting-Ip"))
 		logrus.Info("================== disconnected =======================")
 	})
 
 	wsServer.HandleMessage(func(s *melody.Session, b []byte) {
-
-		// cache.RClient.ZAdd(ONLINE_USERS, &redis.Z{Score: float64(time.Now().UnixMilli()), Member: s.Request.Header.Get("Cf-Connecting-Ip")})
-
 		midJson := make([]json.RawMessage, 0)
 
 		if err := json.Unmarshal(b, &midJson); err != nil {
@@ -105,6 +98,16 @@ func initWSHandlers() {
 			// if filters != nil {
 			// 	logrus.Info()
 			// }
+
+			reqlog := entity.ReqLog{
+				AcceptLanguage: s.Request.Header.Get("Accept-Language"),
+				UserAgent:      s.Request.Header.Get("User-Agent"),
+				Origin:         s.Request.Header.Get("Origin"),
+				CFIPCountry:    s.Request.Header.Get("Cf-Ipcountry"),
+				CFConnectingIP: s.Request.Header.Get("Cf-Connecting-Ip"),
+				ReqBody:        json.RawMessage(b),
+			}
+			dao.DB.Create(&reqlog)
 
 			handleReqRequest(s, subId, filters)
 			// logrus.Info("filter req: ", subId,  " filters: "m f)

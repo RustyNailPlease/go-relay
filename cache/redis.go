@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v7"
@@ -32,23 +31,25 @@ func InitRedis(ip string, port string, username string, password string, db int)
 }
 
 func CleanOnlineZSet() {
-	rmTicker := time.NewTicker(10 * time.Minute)
+	// rmTicker := time.NewTicker(100 * time.Minute)
 	prtTicker := time.NewTicker(1 * time.Minute)
 	for {
 		select {
-		case <-rmTicker.C:
-			RClient.ZRemRangeByScore(ONLINE_USERS, "0", fmt.Sprintf("%d", time.Now().Add(-1*10*time.Minute).UnixMilli()))
+		// case <-rmTicker.C:
+		// 	continue
+		// RClient.ZRemRangeByScore(ONLINE_USERS, "0", fmt.Sprintf("%d", time.Now().Add(-1*10*time.Minute).UnixMilli()))
 		case <-prtTicker.C:
 			PrintOnline()
 		}
 	}
 }
 
+// count set
 func PrintOnline() {
-	rc := RClient.ZCount(ONLINE_USERS, fmt.Sprintf("%d", time.Now().Add(-1*10*time.Minute).UnixMilli()), fmt.Sprintf("%d", time.Now().UnixMilli()))
-	if rc.Err() != nil {
-		logrus.Error("获取在线人数失败：", rc.Err().Error())
-	} else {
-		logrus.Info("当前【", rc.Val(), "】连接")
+	count := RClient.SCard(ONLINE_USERS)
+	if count.Err() != nil {
+		logrus.Error(count.Err().Error())
+		return
 	}
+	logrus.Info("online user connection: ", count.Val())
 }
