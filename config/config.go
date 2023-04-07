@@ -16,6 +16,14 @@ type ServerConfig struct {
 		Port     string
 	}
 
+	Redis struct {
+		Host     string
+		Port     string
+		Username string
+		Password string
+		DB       int
+	}
+
 	Relay struct {
 		AdminPubKey string
 		Nips        []int

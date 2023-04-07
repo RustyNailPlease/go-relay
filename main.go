@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 
+	"github.com/RustyNailPlease/go-relay/cache"
 	"github.com/RustyNailPlease/go-relay/config"
 	"github.com/RustyNailPlease/go-relay/dao"
 	"github.com/RustyNailPlease/go-relay/server"
@@ -39,6 +40,16 @@ func main() {
 		config.PGSQL.Password,
 		config.ServerMode == "debug",
 	)
+
+	go cache.InitRedis(
+		config.Redis.Host,
+		config.Redis.Port,
+		config.Redis.Username,
+		config.Redis.Password,
+		config.Redis.DB,
+	)
+
+	go cache.CleanOnlineZSet()
 
 	server.InitServer(&config)
 }

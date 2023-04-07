@@ -19,6 +19,13 @@ Password = "pgpwd"
 Host = "0.0.0.0"
 Port = 5432
 
+[Redis]
+Host = "0.0.0.0"
+Port = ":6379"
+Username = ""
+Password = ""
+DB = 3
+
 [Relay]
 AdminPubKey = "xxx"
 Nips = [ 1, 2, 9, 11, 25, 65 ]

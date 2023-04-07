@@ -2,12 +2,20 @@ package server
 
 import (
 	"encoding/json"
+	"strings"
+	"time"
 
 	cacheutils "github.com/RustyNailPlease/CacheUtil"
+	"github.com/RustyNailPlease/go-relay/cache"
 	"github.com/RustyNailPlease/go-relay/dao"
 	"github.com/RustyNailPlease/go-relay/entity"
+	"github.com/go-redis/redis/v7"
 	"github.com/olahol/melody"
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	ONLINE_USERS string = "online_users"
 )
 
 var spammerKeyLRU *cacheutils.LRUCache[string]
@@ -18,14 +26,31 @@ func init() {
 
 func initWSHandlers() {
 	wsServer.HandleConnect(func(s *melody.Session) {
-		logrus.Info(s.Request.RemoteAddr + " connected.")
+		logrus.Info("==================connected=======================")
+		logrus.Info(s.Request.Header.Get("Cf-Connecting-Ip") + " connected.")
+		logrus.Info(s.Request.RemoteAddr)
+		for k, v := range s.Request.Header {
+			logrus.Info(k, " --> ", strings.Join(v, ""))
+		}
+		cache.RClient.ZAdd(ONLINE_USERS, &redis.Z{Score: float64(time.Now().UnixMilli()), Member: s.Request.Header.Get("Cf-Connecting-Ip")})
+		// now users
+		cache.PrintOnline()
+		logrus.Info("==================connected=======================")
 	})
 
 	wsServer.HandleDisconnect(func(s *melody.Session) {
-		logrus.Info(s.Request.RemoteAddr + " disconnected.")
+		logrus.Info("================== disconnected =======================")
+		logrus.Info(s.Request.Header.Get("Cf-Connecting-Ip") + " disconnected.")
+		for k, v := range s.Request.Header {
+			logrus.Info(k, " --> ", strings.Join(v, ""))
+		}
+		logrus.Info("================== disconnected =======================")
 	})
 
 	wsServer.HandleMessage(func(s *melody.Session, b []byte) {
+
+		// cache.RClient.ZAdd(ONLINE_USERS, &redis.Z{Score: float64(time.Now().UnixMilli()), Member: s.Request.Header.Get("Cf-Connecting-Ip")})
+
 		midJson := make([]json.RawMessage, 0)
 
 		if err := json.Unmarshal(b, &midJson); err != nil {
@@ -71,11 +96,11 @@ func initWSHandlers() {
 
 			s.Write(SerialMessages("OK", event.PubKey, ""))
 		case "REQ":
-			logrus.Info("==============")
-			for _, s := range midJson {
-				logrus.Info(string(s))
-			}
-			logrus.Info("==============")
+			// logrus.Info("==============")
+			// for _, s := range midJson {
+			// 	logrus.Info(string(s))
+			// }
+			// logrus.Info("==============")
 			subId, filters := parseReqFilterMessage(midJson)
 			if filters != nil {
 				logrus.Info()

@@ -6,6 +6,7 @@ require (
 	github.com/RustyNailPlease/CacheUtil v0.0.0-20221105102345-4df3a634dbb5
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
+	github.com/go-redis/redis/v7 v7.4.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/nbd-wtf/go-nostr v0.13.2
 	github.com/olahol/melody v1.1.1

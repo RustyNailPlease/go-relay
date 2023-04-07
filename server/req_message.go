@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"time"
@@ -48,8 +47,8 @@ func handleReqRequest(s *melody.Session, subid string, filters nostr.Filters) {
 		}
 
 		if len(filter.Tags) > 0 {
-			tb, _ := json.Marshal(filter.Tags)
-			logrus.Info("tag query: ", string(tb))
+			// tb, _ := json.Marshal(filter.Tags)
+			// logrus.Info("tag query: ", string(tb))
 
 			if eid, ok := filter.Tags["e"]; ok {
 				conditions["tags @> ?"] = fmt.Sprintf("[[\"e\", \"%s\"]]", eid[0])
