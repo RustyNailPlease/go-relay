@@ -28,7 +28,7 @@ func initWSHandlers() {
 	wsServer.HandleConnect(func(s *melody.Session) {
 		logrus.Info("==================connected=======================")
 		logrus.Info(s.Request.Header.Get("Cf-Connecting-Ip") + " connected.")
-		logrus.Info(s.Request.RemoteAddr)
+		// logrus.Info(s.Request.RemoteAddr)
 		for k, v := range s.Request.Header {
 			logrus.Info(k, " --> ", strings.Join(v, ""))
 		}
@@ -102,9 +102,9 @@ func initWSHandlers() {
 			// }
 			// logrus.Info("==============")
 			subId, filters := parseReqFilterMessage(midJson)
-			if filters != nil {
-				logrus.Info()
-			}
+			// if filters != nil {
+			// 	logrus.Info()
+			// }
 
 			handleReqRequest(s, subId, filters)
 			// logrus.Info("filter req: ", subId,  " filters: "m f)
