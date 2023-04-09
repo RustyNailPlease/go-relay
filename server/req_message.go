@@ -118,7 +118,7 @@ func eventDeleted(id string) bool {
 	// }
 
 	var count int
-	dao.DB.Model(&entity.Event{}).Where("id = ? and kind = 5", id).Count(&count)
+	dao.DB.Model(&entity.Event{}).Where("kind = 5 and tags @> ?", fmt.Sprintf("[[\"e\", \"%s\"]]", id)).Count(&count)
 	if count > 0 {
 		logrus.Info(id, " skip for deleted")
 		// deletedCache.Set(id, id)
