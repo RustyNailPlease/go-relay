@@ -81,13 +81,22 @@ func initWSHandlers() {
 				}
 			}
 
-			if h, ok := EVENT_HANDLER[event.Kind]; ok {
-				h(s, &event)
-			} else {
-				s.Write(SerialMessages("NOTICE", event.ID, "this event kind not implemented yet."))
+			var count int
+			dao.DB.Model(&entity.Event{}).Where("id = ?", event.ID).Count(&count)
+			if count == 0 {
+				// save it
+				et, err := entity.FromNostrEvent(&event)
+				if err != nil {
+					logrus.Error("parse event error :", err.Error())
+					s.Write(SerialMessages("NOTICE", event.ID, "save note error"))
+					return
+				} else {
+					dao.DB.Model(&entity.Event{}).Create(&et)
+					s.Write(SerialMessages("OK", event.ID, true, "note saved."))
+					return
+				}
 			}
-
-			s.Write(SerialMessages("OK", event.PubKey, ""))
+			s.Write(SerialMessages("OK", event.ID, true, "note saved."))
 		case "REQ":
 			// logrus.Info("==============")
 			// for _, s := range midJson {
